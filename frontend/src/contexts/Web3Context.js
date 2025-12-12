@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
-import { Web3Provider as EthersWeb3Provider } from '@ethersproject/providers';
-import * as zksync from 'zksync-web3';
 import toast from 'react-hot-toast';
 import { blockchainService } from '../services/blockchainService';
 
@@ -18,10 +16,6 @@ const initialState = {
   provider: null,
   signer: null,
   
-  // zkSync state
-  zkSyncProvider: null,
-  zkSyncSigner: null,
-  
   // Contract state
   contract: null,
   contractAddress: null,
@@ -31,7 +25,7 @@ const initialState = {
   
   // Support state
   isMetaMaskInstalled: false,
-  supportedChains: ['0x144', '0x12c'], // zkSync Era mainnet and testnet
+  supportedChains: ['0x539'], // Ganache (1337 in decimal)
 };
 
 // Action types
@@ -43,7 +37,6 @@ const Web3ActionTypes = {
   SET_CHAIN_ID: 'SET_CHAIN_ID',
   SET_BALANCE: 'SET_BALANCE',
   SET_PROVIDER: 'SET_PROVIDER',
-  SET_ZKSYNC_PROVIDER: 'SET_ZKSYNC_PROVIDER',
   SET_CONTRACT: 'SET_CONTRACT',
   SET_ERROR: 'SET_ERROR',
   CLEAR_ERROR: 'CLEAR_ERROR',
@@ -78,8 +71,7 @@ const web3Reducer = (state, action) => {
         balance: null,
         provider: null,
         signer: null,
-        zkSyncProvider: null,
-        zkSyncSigner: null,
+
         contract: null,
       };
     
@@ -108,12 +100,7 @@ const web3Reducer = (state, action) => {
         signer: action.payload.signer,
       };
     
-    case Web3ActionTypes.SET_ZKSYNC_PROVIDER:
-      return {
-        ...state,
-        zkSyncProvider: action.payload.provider,
-        zkSyncSigner: action.payload.signer,
-      };
+
     
     case Web3ActionTypes.SET_CONTRACT:
       return {
@@ -151,27 +138,16 @@ const Web3Context = createContext();
 
 // Network configurations
 const NETWORKS = {
-  zkSyncEra: {
-    chainId: '0x144', // 324 in decimal
-    chainName: 'zkSync Era Mainnet',
-    rpcUrls: ['https://mainnet.era.zksync.io'],
+  ganache: {
+    chainId: '0x539', // 1337 in decimal
+    chainName: 'Ganache Local',
+    rpcUrls: [process.env.REACT_APP_GANACHE_URL || 'http://127.0.0.1:7545'],
     nativeCurrency: {
       name: 'Ethereum',
       symbol: 'ETH',
       decimals: 18,
     },
-    blockExplorerUrls: ['https://explorer.zksync.io/'],
-  },
-  zkSyncEraTestnet: {
-    chainId: '0x12c', // 300 in decimal
-    chainName: 'zkSync Era Testnet',
-    rpcUrls: ['https://testnet.era.zksync.dev'],
-    nativeCurrency: {
-      name: 'Ethereum',
-      symbol: 'ETH',
-      decimals: 18,
-    },
-    blockExplorerUrls: ['https://goerli.explorer.zksync.io/'],
+    blockExplorerUrls: [],
   },
 };
 
@@ -282,13 +258,9 @@ export const Web3Provider = ({ children }) => {
       const account = accounts[0];
       const chainId = await window.ethereum.request({ method: 'eth_chainId' });
 
-      // Create providers
-      const provider = new EthersWeb3Provider(window.ethereum);
+      // Create providers  
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-
-      // Create zkSync provider
-      const zkSyncProvider = new zksync.Provider('https://testnet.era.zksync.dev');
-      const zkSyncSigner = zksync.Wallet.createRandom().connect(zkSyncProvider);
 
       // Update state
       dispatch({ type: Web3ActionTypes.SET_ACCOUNT, payload: account });
@@ -296,10 +268,6 @@ export const Web3Provider = ({ children }) => {
       dispatch({
         type: Web3ActionTypes.SET_PROVIDER,
         payload: { provider, signer },
-      });
-      dispatch({
-        type: Web3ActionTypes.SET_ZKSYNC_PROVIDER,
-        payload: { provider: zkSyncProvider, signer: zkSyncSigner },
       });
       dispatch({ type: Web3ActionTypes.SET_CONNECTED });
 
@@ -342,7 +310,7 @@ export const Web3Provider = ({ children }) => {
   const initializeContract = async (signer) => {
     try {
       const contract = await blockchainService.getContract(signer);
-      const contractAddress = await contract.getAddress();
+      const contractAddress = contract.address;
       
       dispatch({
         type: Web3ActionTypes.SET_CONTRACT,
@@ -355,7 +323,7 @@ export const Web3Provider = ({ children }) => {
   };
 
   // Switch to supported network
-  const switchNetwork = async (networkKey = 'zkSyncEraTestnet') => {
+  const switchNetwork = async (networkKey = 'ganache') => {
     try {
       const network = NETWORKS[networkKey];
       if (!network) {
@@ -408,8 +376,7 @@ export const Web3Provider = ({ children }) => {
   // Get network name
   const getNetworkName = () => {
     const networkMap = {
-      '0x144': 'zkSync Era Mainnet',
-      '0x12c': 'zkSync Era Testnet',
+      '0x539': 'Ganache Local',
     };
     return networkMap[state.chainId] || 'Unknown Network';
   };

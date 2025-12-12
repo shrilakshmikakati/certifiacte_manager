@@ -13,7 +13,7 @@ const deployContract = catchAsync(async (req, res, next) => {
         message: 'Contract deployment should be handled by deployment scripts',
         data: {
             contractAddress: process.env.CONTRACT_ADDRESS,
-            network: process.env.NODE_ENV === 'production' ? 'zkSync Era Mainnet' : 'zkSync Era Testnet'
+            network: 'Ganache Local'
         }
     });
 });

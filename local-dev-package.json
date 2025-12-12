@@ -1,0 +1,23 @@
+{
+  "name": "local-development",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npm run start:services && sleep 10 && npm run deploy:local && npm run start:apps",
+    "start:services": "docker-compose -f docker-compose.local.yml up -d",
+    "stop:services": "docker-compose -f docker-compose.local.yml down",
+    "deploy:local": "cd contracts && npm run deploy:local",
+    "start:apps": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && cp ../.env.local .env && npm run dev",
+    "start:frontend": "cd frontend && cp ../.env.local .env.local && npm start",
+    "reset": "npm run stop:services && npm run clean && npm run start",
+    "clean": "docker-compose -f docker-compose.local.yml down -v && docker volume prune -f",
+    "logs": "docker-compose -f docker-compose.local.yml logs -f",
+    "logs:ganache": "docker-compose -f docker-compose.local.yml logs -f ganache",
+    "logs:mongo": "docker-compose -f docker-compose.local.yml logs -f mongodb",
+    "status": "docker-compose -f docker-compose.local.yml ps",
+    "install:all": "npm install && cd contracts && npm install && cd ../backend && npm install && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}

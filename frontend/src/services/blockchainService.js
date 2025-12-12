@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import * as zksync from 'zksync-web3';
 import { apiRequest, endpoints } from './api';
 import toast from 'react-hot-toast';
 
@@ -30,14 +29,14 @@ const CERTIFICATE_REGISTRY_ABI = [
 ];
 
 // Contract address (you'll need to set this after deployment)
-const CONTRACT_ADDRESS = process.env.REACT_APP_CONTRACT_ADDRESS || '0x...';
+const CONTRACT_ADDRESS = process.env.REACT_APP_CERTIFICATE_REGISTRY_ADDRESS || '0x...';
 
-// zkSync network configuration
-const ZKSYNC_NETWORK = {
-  chainId: 300, // zkSync Era testnet
-  name: 'zkSync Era Testnet',
-  rpcUrl: 'https://testnet.era.zksync.dev',
-  blockExplorer: 'https://goerli.explorer.zksync.io',
+// Ganache network configuration
+const GANACHE_NETWORK = {
+  chainId: 1337, // Ganache local
+  name: 'Ganache Local',
+  rpcUrl: process.env.REACT_APP_GANACHE_URL || 'http://127.0.0.1:7545',
+  blockExplorer: null,
 };
 
 // Certificate status enum
@@ -62,8 +61,6 @@ class BlockchainService {
     this.provider = null;
     this.signer = null;
     this.contract = null;
-    this.zkSyncProvider = null;
-    this.zkSyncSigner = null;
   }
 
   // Initialize providers
@@ -71,9 +68,6 @@ class BlockchainService {
     try {
       this.provider = web3Provider;
       this.signer = web3Signer;
-      
-      // Initialize zkSync provider
-      this.zkSyncProvider = new zksync.Provider(ZKSYNC_NETWORK.rpcUrl);
       
       // Create contract instance
       if (CONTRACT_ADDRESS && CONTRACT_ADDRESS !== '0x...') {
@@ -437,7 +431,10 @@ class BlockchainService {
 
   // Get block explorer URL
   getBlockExplorerUrl(transactionHash) {
-    return `${ZKSYNC_NETWORK.blockExplorer}/tx/${transactionHash}`;
+    // Ganache doesn't have a block explorer, return null or a local URL
+    return GANACHE_NETWORK.blockExplorer 
+      ? `${GANACHE_NETWORK.blockExplorer}/tx/${transactionHash}` 
+      : null;
   }
 
   // Sync blockchain data with backend
@@ -459,5 +456,5 @@ class BlockchainService {
 // Create and export singleton instance
 const blockchainService = new BlockchainService();
 
-export { blockchainService, CertificateStatus, Roles };
+export { blockchainService };
 export default blockchainService;

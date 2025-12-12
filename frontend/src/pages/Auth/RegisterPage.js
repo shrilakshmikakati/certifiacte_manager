@@ -20,7 +20,7 @@ import { cn } from '../../utils/cn';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { register: registerUser } = useAuth();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -73,11 +73,11 @@ const RegisterPage = () => {
   ];
 
   const departmentSizes = [
-    { value: '1-10', label: '1-10 people' },
-    { value: '11-50', label: '11-50 people' },
-    { value: '51-200', label: '51-200 people' },
-    { value: '201-1000', label: '201-1000 people' },
-    { value: '1000+', label: '1000+ people' }
+    { value: 'CSE', label: 'CSE' },
+    { value: 'CIVIL', label: 'CIVIL' },
+    { value: 'ECE', label: 'ECE' },
+    { value: 'EEE', label: 'EEE' },
+    { value: 'MECH', label: 'MECH' }
   ];
 
   const validateEmail = (email) => {
@@ -174,19 +174,33 @@ const RegisterPage = () => {
     setError('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mock registration success
-      await login({
-        id: '1',
-        name: `${formData.firstName} ${formData.lastName}`,
+      // Register the user with the backend using AuthContext
+      const registrationData = {
+        username: `${formData.firstName}${formData.lastName}`.toLowerCase(),
         email: formData.email,
-        role: formData.role,
-        organization: formData.organization
-      });
+        password: formData.password,
+        role: formData.role || 'creator',
+        profile: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          organization: formData.organization,
+          phone: formData.phone || '',
+          address: formData.address || ''
+        }
+      };
       
-      navigate('/app/dashboard');
+      // Add wallet address only if provided
+      if (formData.walletAddress) {
+        registrationData.walletAddress = formData.walletAddress;
+      }
+      
+      const result = await registerUser(registrationData);
+      
+      if (result.success) {
+        navigate('/app/dashboard');
+      } else {
+        throw new Error(result.error || 'Registration failed');
+      }
     } catch (err) {
       setError('Registration failed. Please try again.');
     } finally {

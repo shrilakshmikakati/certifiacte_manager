@@ -42,8 +42,8 @@ const register = catchAsync(async (req, res, next) => {
     const { username, email, password, role, walletAddress, profile } = req.body;
 
     // Validate required fields
-    if (!username || !email || !password || !walletAddress || !profile) {
-        return next(new AppError('Please provide all required fields', 400));
+    if (!username || !email || !password || !profile) {
+        return next(new AppError('Please provide username, email, password, and profile', 400));
     }
 
     // Validate role
@@ -53,12 +53,18 @@ const register = catchAsync(async (req, res, next) => {
     }
 
     // Check if user already exists
+    const existingUserQuery = [
+        { email },
+        { username }
+    ];
+    
+    // Only check wallet address if provided
+    if (walletAddress && walletAddress !== '0x0000000000000000000000000000000000000000') {
+        existingUserQuery.push({ walletAddress: walletAddress.toLowerCase() });
+    }
+    
     const existingUser = await User.findOne({
-        $or: [
-            { email },
-            { username },
-            { walletAddress: walletAddress.toLowerCase() }
-        ]
+        $or: existingUserQuery
     });
 
     if (existingUser) {
@@ -66,15 +72,21 @@ const register = catchAsync(async (req, res, next) => {
     }
 
     // Create new user
-    const newUser = await User.create({
+    const userData = {
         username,
         email,
         password,
         role: role || USER_ROLES.CREATOR,
-        walletAddress: walletAddress.toLowerCase(),
         profile,
         permissions: getDefaultPermissions(role || USER_ROLES.CREATOR)
-    });
+    };
+    
+    // Add wallet address only if provided and not placeholder
+    if (walletAddress && walletAddress !== '0x0000000000000000000000000000000000000000') {
+        userData.walletAddress = walletAddress.toLowerCase();
+    }
+    
+    const newUser = await User.create(userData);
 
     logger.info(`New user registered: ${email} (${newUser.role})`);
 

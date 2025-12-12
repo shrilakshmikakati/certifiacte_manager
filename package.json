@@ -1,0 +1,22 @@
+{
+  "name": "certificate-manager",
+  "version": "1.0.0",
+  "description": "Decentralized Certificate Management System",
+  "scripts": {
+    "dev": "concurrently \"npm run ganache:start\" \"npm run backend:dev\" \"npm run frontend:start\" --names \"GANACHE,BACKEND,FRONTEND\" --prefix-colors \"blue,green,cyan\"",
+    "start": "concurrently \"npm run backend:start\" \"npm run frontend:start\" --names \"BACKEND,FRONTEND\" --prefix-colors \"green,cyan\"",
+    "ganache:start": "cd contracts && ganache --port 7545 --accounts 10 --deterministic",
+    "contracts:deploy": "cd contracts && npm run deploy:ganache",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:start": "cd backend && npm run start",
+    "frontend:start": "cd frontend && set PORT=3000&& npm start",
+    "frontend:build": "cd frontend && npm run build",
+    "install:all": "npm install && cd contracts && npm install && cd ../backend && npm install --legacy-peer-deps && cd ../frontend && npm install",
+    "setup": "npm run install:all && npm run contracts:deploy",
+    "clean": "Remove-Item -Recurse -Force node_modules,contracts/node_modules,backend/node_modules,frontend/node_modules -ErrorAction SilentlyContinue"
+  },
+  
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -4,7 +4,7 @@ import {
   CheckBadgeIcon, 
   ClockIcon, 
   UsersIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   DocumentTextIcon,
   ShieldCheckIcon,
   ExclamationTriangleIcon
@@ -264,7 +264,7 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-600">Monthly Growth</span>
                 <div className="flex items-center space-x-2">
-                  <TrendingUpIcon className="h-4 w-4 text-success-500" />
+                  <ArrowTrendingUpIcon className="h-4 w-4 text-success-500" />
                   <span className="text-sm font-semibold text-success-600">
                     +{stats.monthlyGrowth}%
                   </span>

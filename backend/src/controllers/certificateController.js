@@ -139,7 +139,7 @@ const createCertificate = catchAsync(async (req, res, next) => {
         creator: req.user._id,
         blockchain: {
             certificateHash,
-            network: 'zkSync Era'
+            network: 'Ganache'
         },
         ipfs: {
             cid: ipfsResult.cid,
@@ -428,7 +428,7 @@ const createSingleCertificate = async (certData, user) => {
     return await Certificate.create({
         ...certData,
         creator: user._id,
-        blockchain: { certificateHash, network: 'zkSync Era' },
+        blockchain: { certificateHash, network: 'Ganache' },
         ipfs: {
             cid: ipfsResult.cid,
             encryptionKey: encryptionPassword,

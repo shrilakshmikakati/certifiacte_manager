@@ -229,7 +229,7 @@ const createCertificatesFromUpload = catchAsync(async (req, res, next) => {
                 creator: req.user._id,
                 blockchain: {
                     certificateHash,
-                    network: 'zkSync Era'
+                    network: 'Ganache'
                 },
                 ipfs: {
                     cid: ipfsResult.cid,

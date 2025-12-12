@@ -438,8 +438,5 @@ export {
   Textarea,
   SearchInput,
   InputWithIcon,
-  DateInput,
-  SelectInput,
-  FileInput,
   inputVariants
 };

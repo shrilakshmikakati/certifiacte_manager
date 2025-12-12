@@ -76,22 +76,7 @@ export function truncateText(text, length = 50) {
   return text.substring(0, length) + '...';
 }
 
-/**
- * Format date in a human readable format
- * @param {Date|string} date - Date to format
- * @param {object} options - Intl.DateTimeFormat options
- * @returns {string} - Formatted date string
- */
-export function formatDate(date, options = {}) {
-  const defaultOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    ...options,
-  };
-  
-  return new Date(date).toLocaleDateString(undefined, defaultOptions);
-}
+
 
 /**
  * Get relative time string (e.g., "2 hours ago")

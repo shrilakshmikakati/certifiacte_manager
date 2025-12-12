@@ -1,5 +1,4 @@
 const { ethers } = require('ethers');
-const { Wallet, Provider, Contract } = require('zksync-web3');
 const logger = require('../utils/logger');
 const { AppError } = require('../middleware/errorHandler');
 
@@ -34,27 +33,25 @@ class BlockchainService {
     // Initialize blockchain connection
     async initialize() {
         try {
-            // Initialize provider
-            const rpcUrl = process.env.NODE_ENV === 'production' 
-                ? process.env.ZKSYNC_RPC_URL 
-                : process.env.ZKSYNC_TESTNET_RPC_URL;
+            // Initialize provider for Ganache
+            const rpcUrl = process.env.GANACHE_RPC_URL || 'http://localhost:7545';
 
             if (!rpcUrl) {
-                logger.warn('⚠️ zkSync RPC URL not configured');
+                logger.warn('⚠️ Ganache RPC URL not configured');
                 return;
             }
 
-            this.provider = new Provider(rpcUrl);
+            this.provider = new ethers.JsonRpcProvider(rpcUrl);
             
             // Initialize wallet if private key is provided
             if (process.env.PRIVATE_KEY) {
-                this.wallet = new Wallet(process.env.PRIVATE_KEY, this.provider);
+                this.wallet = new ethers.Wallet(process.env.PRIVATE_KEY, this.provider);
                 logger.info(`🔗 Blockchain wallet connected: ${this.wallet.address}`);
             }
 
             // Initialize contract if address is provided
             if (this.contractAddress && this.wallet) {
-                this.contract = new Contract(this.contractAddress, CERTIFICATE_REGISTRY_ABI, this.wallet);
+                this.contract = new ethers.Contract(this.contractAddress, CERTIFICATE_REGISTRY_ABI, this.wallet);
                 logger.info(`📄 Certificate Registry contract connected: ${this.contractAddress}`);
             }
 
@@ -71,12 +68,16 @@ class BlockchainService {
         try {
             if (this.provider) {
                 const network = await this.provider.getNetwork();
-                logger.info(`🌐 Connected to zkSync network: ${network.name} (Chain ID: ${network.chainId})`);
+                logger.info(`🌐 Connected to Ganache network: ${network.name} (Chain ID: ${network.chainId})`);
             }
 
             if (this.contract) {
-                const totalCerts = await this.contract.getTotalCertificates();
-                logger.info(`📊 Total certificates on chain: ${totalCerts.toString()}`);
+                try {
+                    const totalCerts = await this.contract.getTotalCertificates();
+                    logger.info(`📊 Total certificates on chain: ${totalCerts.toString()}`);
+                } catch (error) {
+                    logger.warn('⚠️  Could not fetch total certificates, contract might need initialization:', error.message);
+                }
             }
 
             return true;

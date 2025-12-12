@@ -164,7 +164,7 @@ const certificateSchema = new mongoose.Schema({
         tokenId: String, // For NFT certificates
         network: {
             type: String,
-            default: 'zkSync Era'
+            default: 'Ganache'
         }
     },
     

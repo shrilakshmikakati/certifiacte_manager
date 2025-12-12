@@ -323,6 +323,18 @@ const LoadingModal = ({
   </Modal>
 );
 
+// InfoModal component for displaying information
+const InfoModal = ({ isOpen, onClose, title, children, ...props }) => (
+  <Modal isOpen={isOpen} onClose={onClose} {...props}>
+    <ModalHeader onClose={onClose}>
+      {title}
+    </ModalHeader>
+    <ModalBody>
+      {children}
+    </ModalBody>
+  </Modal>
+);
+
 export {
   Modal,
   ModalHeader,
@@ -331,6 +343,7 @@ export {
   ConfirmationModal,
   AlertModal,
   LoadingModal,
+  InfoModal,
   modalVariants,
   modalContentVariants
 };

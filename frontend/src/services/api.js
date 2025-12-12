@@ -275,6 +275,7 @@ export const endpoints = {
   auth: {
     login: '/auth/login',
     register: '/auth/register',
+    walletLogin: '/auth/wallet-login',
     logout: '/auth/logout',
     profile: '/auth/profile',
     updateProfile: '/auth/profile',

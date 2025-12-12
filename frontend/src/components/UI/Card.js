@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
@@ -369,6 +369,19 @@ const CertificateCard = ({
   );
 };
 
+// DetailCard component for detailed information display
+const DetailCard = React.forwardRef(({ className, title, children, ...props }, ref) => (
+  <Card ref={ref} className={cn("", className)} {...props}>
+    {title && (
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+    )}
+    <CardContent>{children}</CardContent>
+  </Card>
+));
+DetailCard.displayName = "DetailCard";
+
 export {
   Card,
   CardHeader,
@@ -379,5 +392,6 @@ export {
   StatsCard,
   FeatureCard,
   CertificateCard,
+  DetailCard,
   cardVariants
 };

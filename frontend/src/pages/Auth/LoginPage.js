@@ -8,6 +8,7 @@ import {
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { Card } from '../../components/UI/Card';
+import { apiRequest, endpoints } from '../../services/api';
 import { Button } from '../../components/UI/Button';
 import { Input } from '../../components/UI/Input';
 import { Alert } from '../../components/UI/Alert';
@@ -19,7 +20,7 @@ import { cn } from '../../utils/cn';
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { connectWallet, isConnected, account } = useWeb3();
+  const { connectWallet, signMessage, isConnected, account } = useWeb3();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -101,21 +102,34 @@ const LoginPage = () => {
 
   const handleWeb3Login = async () => {
     try {
-      const walletAccount = await connectWallet();
-      if (walletAccount) {
-        // In a real app, you'd verify the wallet signature
-        await login({
-          id: '1',
-          name: 'Web3 User',
-          email: 'web3@example.com',
-          role: 'creator',
-          organization: 'Blockchain Institute',
-          walletAddress: walletAccount
-        });
-        navigate('/app/dashboard');
+      const walletResult = await connectWallet();
+      if (walletResult.success && walletResult.account) {
+        // Create a message for the user to sign
+        const message = `Login to Certificate Manager with wallet: ${walletResult.account}`;
+        
+        // Sign the message
+        const signResult = await signMessage(message);
+        if (signResult.success) {
+          // Use wallet login endpoint with signature
+          const response = await apiRequest.post(endpoints.auth.walletLogin, {
+            walletAddress: walletResult.account,
+            signature: signResult.signature,
+            message: message
+          });
+          
+          if (response.data?.success) {
+            // Update auth context with the user data
+            await login(response.data.data.user);
+            navigate('/dashboard');
+          } else {
+            throw new Error(response.data?.message || 'Wallet login failed');
+          }
+        } else {
+          throw new Error('Failed to sign message');
+        }
       }
     } catch (err) {
-      setError('Failed to connect wallet. Please try again.');
+      setError(err.message || 'Failed to connect wallet. Please try again.');
     }
   };
 
@@ -240,15 +254,6 @@ const LoginPage = () => {
               <ShieldCheckIcon className="h-5 w-5 mr-2" />
               {isConnected ? `Connected: ${account?.slice(0, 6)}...${account?.slice(-4)}` : 'Connect Wallet'}
             </Button>
-
-            {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h3 className="text-sm font-medium text-blue-900 mb-2">Demo Credentials</h3>
-              <div className="text-sm text-blue-800 space-y-1">
-                <p><strong>Email:</strong> admin@example.com</p>
-                <p><strong>Password:</strong> password</p>
-              </div>
-            </div>
           </div>
         </Card>
 

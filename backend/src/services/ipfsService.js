@@ -1,5 +1,5 @@
-const pinataSDK = require('@pinata/sdk');
-const { create } = require('ipfs-http-client');
+const { PinataSDK } = require('pinata');
+// const { create } = require('ipfs-http-client'); // Temporarily disabled due to compatibility issue
 const fs = require('fs').promises;
 const path = require('path');
 const logger = require('../utils/logger');
@@ -16,8 +16,19 @@ class IPFSService {
     async initialize() {
         try {
             // Initialize Pinata SDK
-            if (process.env.PINATA_API_KEY && process.env.PINATA_SECRET_API_KEY) {
-                this.pinata = pinataSDK(process.env.PINATA_API_KEY, process.env.PINATA_SECRET_API_KEY);
+            if (process.env.PINATA_JWT) {
+                this.pinata = new PinataSDK({
+                    pinataJwt: process.env.PINATA_JWT,
+                });
+                
+                // Test Pinata connection
+                await this.testPinataConnection();
+                logger.info('📌 Pinata IPFS service initialized successfully');
+            } else if (process.env.PINATA_API_KEY && process.env.PINATA_SECRET_API_KEY) {
+                this.pinata = new PinataSDK({
+                    pinataApiKey: process.env.PINATA_API_KEY,
+                    pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY,
+                });
                 
                 // Test Pinata connection
                 await this.testPinataConnection();
@@ -27,6 +38,8 @@ class IPFSService {
             }
 
             // Initialize local IPFS client as backup
+            // Temporarily disabled due to ipfs-http-client compatibility issue
+            /*
             try {
                 this.ipfsClient = create({ 
                     host: 'localhost', 
@@ -40,6 +53,8 @@ class IPFSService {
             } catch (error) {
                 logger.warn('⚠️ Local IPFS node not available, using Pinata only');
             }
+            */
+            logger.info('🌐 Local IPFS client temporarily disabled, using Pinata only');
 
         } catch (error) {
             logger.error('❌ Failed to initialize IPFS service:', error);

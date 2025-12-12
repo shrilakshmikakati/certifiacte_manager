@@ -9,7 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Card } from '../../components/UI/Card';
 import { Button } from '../../components/UI/Button';
-import { Input, TextArea, DateInput, SelectInput, FileInput } from '../../components/UI/Input';
+import { Input, Textarea, DateInput, SelectInput, FileInput } from '../../components/UI/Input';
 import { LoadingSpinner } from '../../components/UI/LoadingSpinner';
 import { Alert } from '../../components/UI/Alert';
 import { Badge } from '../../components/UI/Badge';
@@ -337,7 +337,7 @@ const CertificateFormPage = () => {
                 </div>
                 
                 <div className="mt-6">
-                  <TextArea
+                  <Textarea
                     label="Course Description"
                     value={formData.courseDescription}
                     onChange={(e) => handleInputChange('courseDescription', e.target.value)}

@@ -41,8 +41,9 @@ const userSchema = new mongoose.Schema({
     },
     walletAddress: {
         type: String,
-        required: [true, 'Wallet address is required'],
+        required: false,
         unique: true,
+        sparse: true, // Allow multiple documents with null/undefined walletAddress
         lowercase: true,
         match: [/^0x[a-fA-F0-9]{40}$/, 'Please provide a valid Ethereum wallet address']
     },
