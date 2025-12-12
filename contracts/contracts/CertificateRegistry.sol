@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 /**
  * @title CertificateRegistry
- * @dev Smart contract for managing certificate records on zkSync Era
+ * @dev Smart contract for managing certificate records on Ganache
  * 
  * This contract provides a decentralized registry for educational certificates
  * with multi-role access control and IPFS integration for document storage.
